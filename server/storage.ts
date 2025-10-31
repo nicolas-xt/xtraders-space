@@ -1,37 +1,27 @@
-import { type User, type InsertUser } from "@shared/schema";
+import { type TeamMember } from "@shared/schema";
 import { randomUUID } from "crypto";
 
-// modify the interface with any CRUD methods
-// you might need
-
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getTeamMember(uid: string): Promise<TeamMember | undefined>;
+  createTeamMember(member: Omit<TeamMember, "uid">): Promise<TeamMember>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+  private members: Map<string, TeamMember>;
 
   constructor() {
-    this.users = new Map();
+    this.members = new Map();
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getTeamMember(uid: string): Promise<TeamMember | undefined> {
+    return this.members.get(uid);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async createTeamMember(memberData: Omit<TeamMember, "uid">): Promise<TeamMember> {
+    const uid = randomUUID();
+    const member: TeamMember = { ...memberData, uid };
+    this.members.set(uid, member);
+    return member;
   }
 }
 
