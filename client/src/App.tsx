@@ -1,17 +1,51 @@
-import { Switch, Route } from "wouter";
+import { useEffect, useState } from "react";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
+import { auth } from "./lib/firebase";
+import { onAuthStateChanged, getRedirectResult } from "firebase/auth";
+import type { User } from "firebase/auth";
+import Login from "@/pages/Login";
+import Dashboard from "@/pages/Dashboard";
 
 function Router() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getRedirectResult(auth).catch((error) => {
+      console.error("Redirect error:", error);
+    });
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
+      <Route path="/">
+        {user ? <Dashboard /> : <Redirect to="/login" />}
+      </Route>
+      <Route path="/login">
+        {user ? <Redirect to="/" /> : <Login />}
+      </Route>
+      <Route>
+        <Redirect to="/" />
+      </Route>
     </Switch>
   );
 }

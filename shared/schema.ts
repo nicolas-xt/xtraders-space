@@ -1,18 +1,26 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+export const userStatusSchema = z.enum(["Online", "Offline", "In Call"]);
+export type UserStatus = z.infer<typeof userStatusSchema>;
+
+export const teamMemberSchema = z.object({
+  uid: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  photoURL: z.string().nullable(),
+  status: userStatusSchema,
+  lastSeen: z.number(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export type TeamMember = z.infer<typeof teamMemberSchema>;
+
+export const driveFileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  mimeType: z.string(),
+  modifiedTime: z.string(),
+  webViewLink: z.string(),
+  iconLink: z.string().optional(),
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type DriveFile = z.infer<typeof driveFileSchema>;
