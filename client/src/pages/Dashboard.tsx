@@ -7,6 +7,7 @@ import { usePresence } from "@/hooks/usePresence";
 import { TeamMemberCard } from "@/components/TeamMemberCard";
 import { TeamMemberSkeleton } from "@/components/TeamMemberSkeleton";
 import { DriveFilesList } from "@/components/DriveFilesList";
+import { StatusMessageDialog } from "@/components/StatusMessageDialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Video, ExternalLink, LogOut, Users, FolderOpen } from "lucide-react";
+import { Video, ExternalLink, LogOut, Users, FolderOpen, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const MEET_ROOM_URL = "https://meet.google.com/";
@@ -26,9 +27,12 @@ export default function Dashboard() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoiningMeet, setIsJoiningMeet] = useState(false);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
   const currentUser = auth.currentUser;
-  const { updateStatus } = usePresence();
+  const { updateStatus, updateCustomStatus } = usePresence();
   const { toast } = useToast();
+  
+  const currentUserData = teamMembers.find(m => m.uid === currentUser?.uid);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -93,6 +97,14 @@ export default function Dashboard() {
     window.open(MEET_ROOM_URL, "_blank");
   };
 
+  const handleSaveStatus = async (status: string) => {
+    await updateCustomStatus(status);
+    toast({
+      title: "Status updated",
+      description: status ? `Your status is now: "${status}"` : "Status cleared",
+    });
+  };
+
   if (!currentUser) return null;
 
   const currentUserInitials = currentUser.displayName
@@ -143,6 +155,10 @@ export default function Dashboard() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowStatusDialog(true)} data-testid="button-set-status">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                <span>Set status message</span>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleSignOut} data-testid="button-signout">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sign out</span>
@@ -151,6 +167,13 @@ export default function Dashboard() {
           </DropdownMenu>
         </div>
       </header>
+
+      <StatusMessageDialog
+        open={showStatusDialog}
+        onOpenChange={setShowStatusDialog}
+        currentStatus={currentUserData?.customStatus}
+        onSave={handleSaveStatus}
+      />
 
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="space-y-8">

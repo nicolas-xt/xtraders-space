@@ -7,7 +7,36 @@ export function usePresence() {
   const statusUpdateTimeoutRef = useRef<NodeJS.Timeout>();
   const wasInCallRef = useRef(false);
 
-  const updateStatus = async (status: UserStatus) => {
+  const updateStatus = async (status: UserStatus, customStatus?: string) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const updateData: any = {
+        uid: user.uid,
+        name: user.displayName || "Unknown User",
+        email: user.email || "",
+        photoURL: user.photoURL || null,
+        status,
+        lastSeen: Date.now(),
+      };
+
+      if (customStatus !== undefined) {
+        updateData.customStatus = customStatus;
+      }
+
+      await setDoc(userRef, updateData, { merge: true });
+
+      if (status === "In Call") {
+        wasInCallRef.current = true;
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
+  const updateCustomStatus = async (customStatus: string) => {
     const user = auth.currentUser;
     if (!user) return;
 
@@ -16,21 +45,12 @@ export function usePresence() {
       await setDoc(
         userRef,
         {
-          uid: user.uid,
-          name: user.displayName || "Unknown User",
-          email: user.email || "",
-          photoURL: user.photoURL || null,
-          status,
-          lastSeen: Date.now(),
+          customStatus: customStatus || "",
         },
         { merge: true }
       );
-
-      if (status === "In Call") {
-        wasInCallRef.current = true;
-      }
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error updating custom status:", error);
     }
   };
 
@@ -119,5 +139,5 @@ export function usePresence() {
     };
   }, []);
 
-  return { updateStatus };
+  return { updateStatus, updateCustomStatus };
 }

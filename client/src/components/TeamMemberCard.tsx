@@ -57,6 +57,14 @@ export function TeamMemberCard({ member, isCurrentUser = false }: TeamMemberCard
           >
             {member.email}
           </p>
+          {member.customStatus && (
+            <p
+              className="text-xs text-foreground/80 truncate mt-1 italic"
+              data-testid={`text-custom-status-${member.uid}`}
+            >
+              "{member.customStatus}"
+            </p>
+          )}
         </div>
 
         <div className="absolute top-0 right-0 transition-all duration-200">
