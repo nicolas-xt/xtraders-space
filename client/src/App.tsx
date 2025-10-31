@@ -15,11 +15,21 @@ function Router() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getRedirectResult(auth).catch((error) => {
-      console.error("Redirect error:", error);
-    });
+    // Handle redirect result from Google sign-in
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          console.log("Sign-in successful:", result.user);
+        }
+      })
+      .catch((error) => {
+        console.error("Redirect error:", error);
+        console.error("Error code:", error.code);
+        console.error("Error message:", error.message);
+      });
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("Auth state changed:", user ? "User signed in" : "No user");
       setUser(user);
       setLoading(false);
     });
