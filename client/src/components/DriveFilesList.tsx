@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { FileText, Image, Film, Music, Archive, File, ExternalLink } from "lucide-react";
 import { SiGoogledrive } from "react-icons/si";
 
-// 🔗 CONFIGURE A PASTA DO DRIVE DA SUA EQUIPE AQUI
-// Exemplo: "https://drive.google.com/drive/folders/1a2b3c4d5e6f7g8h9i0j"
-const TEAM_DRIVE_FOLDER_URL = "https://drive.google.com/drive/my-drive";
+// 🔗 Pasta do Google Drive da equipe
+const TEAM_DRIVE_FOLDER_URL = "https://drive.google.com/drive/u/0/folders/0ANhzl3TC5lTjUk9PVA";
 
 interface DriveFile {
   id: string;

@@ -21,9 +21,8 @@ import {
 import { Video, ExternalLink, LogOut, Users, FolderOpen, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// 🔗 CONFIGURE SEU LINK FIXO DO MEET AQUI
-// Exemplo: "https://meet.google.com/abc-defg-hij" ou crie um em meet.google.com
-const MEET_ROOM_URL = "https://meet.google.com/new";
+// 🔗 Link fixo do Google Meet da equipe
+const MEET_ROOM_URL = "https://meet.google.com/ers-kcmp-bnf";
 
 export default function Dashboard() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
