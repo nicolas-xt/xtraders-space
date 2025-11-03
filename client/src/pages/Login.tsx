@@ -4,35 +4,54 @@ import { signInWithRedirect } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { Users } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { debugFirebaseConfig } from "@/lib/firebase-debug";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    debugFirebaseConfig();
+  }, []);
+
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      console.log("Starting Google sign-in...");
+      console.log("🚀 Starting Google sign-in...");
+      console.log("Auth instance:", auth);
+      console.log("Google Provider:", googleProvider);
+      
       await signInWithRedirect(auth, googleProvider);
+      console.log("✓ Redirect initiated successfully");
     } catch (error: any) {
-      console.error("Error signing in:", error);
+      console.error("❌ Error signing in:");
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      console.error("Full error:", error);
       setIsLoading(false);
       
       let errorMessage = "Falha ao fazer login com Google";
+      let errorDetails = error.message;
       
       if (error.code === "auth/configuration-not-found") {
-        errorMessage = "Configuração OAuth não encontrada. Configure o Google no Firebase Console.";
+        errorMessage = "Configuração OAuth não encontrada";
+        errorDetails = "O provedor Google não está configurado no Firebase Console. Siga estas etapas:\n1. Acesse Firebase Console\n2. Authentication → Sign-in method\n3. Ative o provedor Google\n4. Adicione este domínio aos domínios autorizados";
       } else if (error.code === "auth/popup-blocked") {
-        errorMessage = "Pop-up bloqueado. Por favor, permita pop-ups para este site.";
+        errorMessage = "Pop-up bloqueado";
+        errorDetails = "Por favor, permita pop-ups para este site.";
       } else if (error.code === "auth/unauthorized-domain") {
-        errorMessage = "Domínio não autorizado. Adicione este domínio no Firebase Console.";
+        errorMessage = "Domínio não autorizado";
+        errorDetails = `Adicione '${window.location.hostname}' aos domínios autorizados no Firebase Console.`;
+      } else if (error.code === "auth/invalid-api-key") {
+        errorMessage = "API Key inválida";
+        errorDetails = "Verifique se VITE_FIREBASE_API_KEY está configurado corretamente nos Secrets.";
       }
       
       toast({
-        title: "Erro ao fazer login",
-        description: errorMessage,
+        title: errorMessage,
+        description: errorDetails,
         variant: "destructive",
       });
     }
