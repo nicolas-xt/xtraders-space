@@ -12,7 +12,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
 
-      const accessToken = authHeader.split('Bearer ')[1];
+      // O token vem como: "googleAccessToken:firebaseIdToken"
+      const tokenParts = authHeader.split('Bearer ')[1].split(':');
+      const googleAccessToken = tokenParts[0];
+      
+      if (!googleAccessToken) {
+        return res.status(401).json({ error: "No Google access token provided" });
+      }
+
       const folderId = "0ANhzl3TC5lTjUk9PVA"; // ID da pasta compartilhada
 
       // Buscar arquivos da pasta específica do Google Drive
@@ -24,7 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `pageSize=10`,
         {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${googleAccessToken}`,
           },
         }
       );

@@ -70,12 +70,19 @@ export function DriveFilesList() {
           return;
         }
 
-        // Obter token de acesso do usuário
-        const token = await user.getIdToken();
+        // Obter o Google Access Token armazenado no login
+        const googleAccessToken = sessionStorage.getItem("googleAccessToken");
+        const firebaseToken = await user.getIdToken();
+
+        if (!googleAccessToken) {
+          console.warn("⚠️ No Google access token found. User may need to re-login.");
+          setIsLoading(false);
+          return;
+        }
 
         const response = await fetch("/api/drive/files", {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${googleAccessToken}:${firebaseToken}`,
           },
         });
 

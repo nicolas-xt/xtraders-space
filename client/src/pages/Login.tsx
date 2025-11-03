@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "@/lib/firebase";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth, provider } from "@/lib/firebase";
 import { Users } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useState } from "react";
@@ -14,16 +14,23 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      
-      const result = await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, provider);
+
+      // Extrair o Google Access Token do credential
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (credential?.accessToken) {
+        // Armazenar o access token para usar com a API do Drive
+        sessionStorage.setItem("googleAccessToken", credential.accessToken);
+        console.log("✅ Google Access Token stored");
+      }
       console.log("✅ Login successful:", result.user.email);
     } catch (error: any) {
       console.error("❌ Login error:", error.code, error.message);
       setIsLoading(false);
-      
+
       let errorMessage = "Falha ao fazer login com Google";
       let errorDetails = error.message;
-      
+
       if (error.code === "auth/configuration-not-found") {
         errorMessage = "Configuração OAuth não encontrada";
         errorDetails = "O provedor Google não está configurado no Firebase Console. Siga estas etapas:\n1. Acesse Firebase Console\n2. Authentication → Sign-in method\n3. Ative o provedor Google\n4. Adicione este domínio aos domínios autorizados";
@@ -37,7 +44,7 @@ export default function Login() {
         errorMessage = "API Key inválida";
         errorDetails = "Verifique se VITE_FIREBASE_API_KEY está configurado corretamente nos Secrets.";
       }
-      
+
       toast({
         title: errorMessage,
         description: errorDetails,
