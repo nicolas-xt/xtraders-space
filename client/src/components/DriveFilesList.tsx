@@ -1,7 +1,11 @@
+
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Image, Film, Music, Archive, File, ExternalLink, FolderOpen } from "lucide-react";
+import { FileText, Image, Film, Music, Archive, File, ExternalLink, FolderOpen, Loader2 } from "lucide-react";
 import { SiGoogledrive } from "react-icons/si";
+import { auth } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 // 🔗 Pasta do Google Drive da equipe
 const TEAM_DRIVE_FOLDER_URL = "https://drive.google.com/drive/u/0/folders/0ANhzl3TC5lTjUk9PVA";
@@ -13,13 +17,6 @@ interface DriveFile {
   modifiedTime: string;
   webViewLink: string;
 }
-
-// 📁 Estes são arquivos de exemplo apenas para demonstração da UI
-// Para mostrar seus arquivos reais, você precisará:
-// 1. Habilitar a Google Drive API no Firebase Console
-// 2. Adicionar o scope do Drive na configuração OAuth
-// 3. Implementar um endpoint no backend para buscar os arquivos
-const mockDriveFiles: DriveFile[] = [];
 
 function getFileIcon(mimeType: string) {
   if (mimeType.includes("document") || mimeType.includes("pdf")) {
@@ -59,6 +56,50 @@ function formatTimeAgo(isoString: string): string {
 }
 
 export function DriveFilesList() {
+  const [files, setFiles] = useState<DriveFile[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchDriveFiles() {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          console.log("ℹ️ User not logged in");
+          setIsLoading(false);
+          return;
+        }
+
+        // Obter token de acesso do usuário
+        const token = await user.getIdToken();
+
+        const response = await fetch("/api/drive/files", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch files: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setFiles(data);
+      } catch (error) {
+        console.error("❌ Error fetching Drive files:", error);
+        toast({
+          title: "Erro ao carregar arquivos",
+          description: "Não foi possível carregar os arquivos do Google Drive.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchDriveFiles();
+  }, [toast]);
+
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
@@ -76,20 +117,27 @@ export function DriveFilesList() {
       </div>
 
       <div className="space-y-0">
-        {mockDriveFiles.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-8">
+            <Loader2 className="w-8 h-8 mx-auto text-muted-foreground animate-spin mb-3" />
+            <p className="text-sm text-muted-foreground">
+              Carregando arquivos...
+            </p>
+          </div>
+        ) : files.length === 0 ? (
           <div className="text-center py-8">
             <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
             <p className="text-sm text-muted-foreground mb-1">
-              Nenhum arquivo carregado
+              Nenhum arquivo encontrado
             </p>
             <p className="text-xs text-muted-foreground/70">
-              Conecte a API do Google Drive para ver seus arquivos
+              A pasta do Google Drive está vazia
             </p>
           </div>
         ) : (
-          mockDriveFiles.map((file, index) => {
+          files.map((file, index) => {
             const Icon = getFileIcon(file.mimeType);
-            const isLast = index === mockDriveFiles.length - 1;
+            const isLast = index === files.length - 1;
 
             return (
               <a
