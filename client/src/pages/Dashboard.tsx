@@ -88,14 +88,42 @@ export default function Dashboard() {
   };
 
   const handleJoinMeet = async () => {
-    if (currentUser) {
+    if (!currentUser) return;
+    
+    try {
       setIsJoiningMeet(true);
+      
+      // Abrir o Google Meet primeiro
+      const meetWindow = window.open(MEET_ROOM_URL, "_blank");
+      
+      if (!meetWindow) {
+        toast({
+          title: "Popup bloqueado",
+          description: "Por favor, permita popups para este site.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Atualizar o status para "In Call"
       await updateStatus("In Call");
+      
+      toast({
+        title: "Entrando na reunião",
+        description: "Você foi marcado como 'In Call'",
+      });
+    } catch (error) {
+      console.error("Error joining meet:", error);
+      toast({
+        title: "Erro ao entrar na reunião",
+        description: "Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
       setTimeout(() => {
         setIsJoiningMeet(false);
       }, 1000);
     }
-    window.open(MEET_ROOM_URL, "_blank");
   };
 
   const handleSaveStatus = async (status: string) => {
