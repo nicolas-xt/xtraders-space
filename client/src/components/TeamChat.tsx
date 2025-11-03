@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,7 +39,7 @@ export function TeamChat() {
         msgs.push({ id: doc.id, ...doc.data() } as ChatMessage);
       });
       setMessages(msgs.reverse());
-      
+
       // Auto-scroll to bottom
       setTimeout(() => {
         if (scrollRef.current) {
@@ -82,7 +81,7 @@ export function TeamChat() {
     const date = new Date(timestamp);
     const now = new Date();
     const isToday = date.toDateString() === now.toDateString();
-    
+
     if (isToday) {
       return date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
     }

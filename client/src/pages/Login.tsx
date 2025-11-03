@@ -16,18 +16,27 @@ export default function Login() {
       setIsLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
 
-      // 🔒 Validar se o email pertence ao domínio permitido
+      // 🔒 Validar se o email está na lista de permitidos
       const userEmail = result.user.email || "";
-      const allowedDomain = "xt-xtraders.com.br";
+      const allowedEmails = [
+        "nicolas@xt-xtraders.com.br",
+        "willian@xt-xtraders.com.br",
+        "suporte@xt-xtraders.com.br",
+        "felipewcolognesi@gmail.com",
+        "samuelyb@outlook.com",
+        "contato.sdroievski@gmail.com",
+        "adrfmendess@gmail.com",
+        "2000evandro.santos@gmail.com",
+      ];
       
-      if (!userEmail.endsWith(`@${allowedDomain}`)) {
+      if (!allowedEmails.includes(userEmail)) {
         // Email não autorizado - fazer logout
         await signOut(auth);
         setIsLoading(false);
         
         toast({
           title: "Acesso negado",
-          description: `Apenas emails @${allowedDomain} podem acessar este Work Hub.`,
+          description: "Apenas membros autorizados podem acessar este Work Hub.",
           variant: "destructive",
         });
         return;
