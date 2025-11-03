@@ -16,20 +16,38 @@ function Router() {
 
   useEffect(() => {
     // Handle redirect result from Google sign-in
+    console.log("🔄 Checking for redirect result...");
     getRedirectResult(auth)
       .then((result) => {
         if (result) {
-          console.log("Sign-in successful:", result.user);
+          console.log("✅ Sign-in successful!");
+          console.log("User:", result.user.displayName);
+          console.log("Email:", result.user.email);
+        } else {
+          console.log("ℹ️ No redirect result (normal page load)");
         }
       })
       .catch((error) => {
-        console.error("Redirect error:", error);
+        console.error("❌ Redirect error:");
         console.error("Error code:", error.code);
         console.error("Error message:", error.message);
+        console.error("Full error:", error);
+        
+        // Show user-friendly error based on code
+        if (error.code === "auth/unauthorized-domain") {
+          alert(`Domínio não autorizado!\n\nAdicione '${window.location.hostname}' aos domínios autorizados no Firebase Console:\n\n1. Vá em Authentication → Settings\n2. Adicione o domínio na lista de 'Authorized domains'`);
+        } else if (error.code === "auth/operation-not-allowed") {
+          alert("Provedor Google não está habilitado!\n\nHabilite no Firebase Console:\n\n1. Vá em Authentication → Sign-in method\n2. Ative o provedor Google");
+        }
       });
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log("Auth state changed:", user ? "User signed in" : "No user");
+      if (user) {
+        console.log("✅ Auth state: User signed in");
+        console.log("User:", user.displayName, user.email);
+      } else {
+        console.log("ℹ️ Auth state: No user");
+      }
       setUser(user);
       setLoading(false);
     });

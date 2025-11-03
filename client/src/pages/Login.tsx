@@ -20,11 +20,13 @@ export default function Login() {
     try {
       setIsLoading(true);
       console.log("🚀 Starting Google sign-in...");
+      console.log("Current URL:", window.location.href);
+      console.log("Auth Domain:", auth.config.authDomain);
       console.log("Auth instance:", auth);
       console.log("Google Provider:", googleProvider);
       
       await signInWithRedirect(auth, googleProvider);
-      console.log("✓ Redirect initiated successfully");
+      console.log("✅ Redirect initiated successfully - you should be redirected to Google now");
     } catch (error: any) {
       console.error("❌ Error signing in:");
       console.error("Error code:", error.code);
