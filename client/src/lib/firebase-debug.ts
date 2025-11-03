@@ -19,5 +19,4 @@ export function debugFirebaseConfig() {
   }
   
   console.groupEnd();
-}nd();
 }
