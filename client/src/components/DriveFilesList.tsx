@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button";
 import { FileText, Image, Film, Music, Archive, File, ExternalLink } from "lucide-react";
 import { SiGoogledrive } from "react-icons/si";
 
+// 🔗 CONFIGURE A PASTA DO DRIVE DA SUA EQUIPE AQUI
+// Exemplo: "https://drive.google.com/drive/folders/1a2b3c4d5e6f7g8h9i0j"
+const TEAM_DRIVE_FOLDER_URL = "https://drive.google.com/drive/my-drive";
+
 interface DriveFile {
   id: string;
   name: string;
@@ -88,7 +92,7 @@ export function DriveFilesList() {
           variant="ghost"
           size="sm"
           className="gap-2"
-          onClick={() => window.open("https://drive.google.com/", "_blank")}
+          onClick={() => window.open(TEAM_DRIVE_FOLDER_URL, "_blank")}
           data-testid="button-view-all-drive"
         >
           <span className="text-sm">View All</span>
@@ -134,11 +138,11 @@ export function DriveFilesList() {
         <Button
           variant="outline"
           className="w-full gap-2"
-          onClick={() => window.open("https://drive.google.com/", "_blank")}
+          onClick={() => window.open(TEAM_DRIVE_FOLDER_URL, "_blank")}
           data-testid="button-open-drive-full"
         >
           <SiGoogledrive className="w-4 h-4" />
-          Open Google Drive
+          Open Team Drive
         </Button>
       </div>
     </Card>
