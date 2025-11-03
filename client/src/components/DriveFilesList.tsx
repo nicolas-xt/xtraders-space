@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, Image, Film, Music, Archive, File, ExternalLink } from "lucide-react";
+import { FileText, Image, Film, Music, Archive, File, ExternalLink, FolderOpen } from "lucide-react";
 import { SiGoogledrive } from "react-icons/si";
 
 // 🔗 Pasta do Google Drive da equipe
