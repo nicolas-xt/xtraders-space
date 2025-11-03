@@ -4,34 +4,21 @@ import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { Users } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { debugFirebaseConfig } from "@/lib/firebase-debug";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    debugFirebaseConfig();
-  }, []);
-
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      console.log("🚀 Starting Google sign-in with popup...");
-      console.log("Current URL:", window.location.href);
-      console.log("Auth Domain:", auth.config.authDomain);
       
       const result = await signInWithPopup(auth, googleProvider);
-      console.log("✅ Sign-in successful!");
-      console.log("User:", result.user.displayName);
-      console.log("Email:", result.user.email);
+      console.log("✅ Login successful:", result.user.email);
     } catch (error: any) {
-      console.error("❌ Error signing in:");
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      console.error("Full error:", error);
+      console.error("❌ Login error:", error.code, error.message);
       setIsLoading(false);
       
       let errorMessage = "Falha ao fazer login com Google";

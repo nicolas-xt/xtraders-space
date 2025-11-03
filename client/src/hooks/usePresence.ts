@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { auth, db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, onSnapshot } from "firebase/firestore";
 import type { UserStatus } from "@shared/schema";
+import { onAuthStateChanged } from "firebase/auth";
 
 export function usePresence() {
   const statusUpdateTimeoutRef = useRef<NodeJS.Timeout>();
@@ -60,7 +61,7 @@ export function usePresence() {
 
     try {
       const userRef = doc(db, "users", user.uid);
-      
+
       await setDoc(
         userRef,
         {

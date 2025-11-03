@@ -8,12 +8,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
+import { usePresence } from "@/hooks/usePresence";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 
 function Router() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Inicializar presença do usuário
+  usePresence();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
