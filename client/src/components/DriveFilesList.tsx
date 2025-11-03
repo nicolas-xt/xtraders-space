@@ -14,36 +14,12 @@ interface DriveFile {
   webViewLink: string;
 }
 
-const mockDriveFiles: DriveFile[] = [
-  {
-    id: "1",
-    name: "Q4 Product Roadmap.pdf",
-    mimeType: "application/pdf",
-    modifiedTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    webViewLink: "https://drive.google.com/",
-  },
-  {
-    id: "2",
-    name: "Team Meeting Notes - Oct 2025",
-    mimeType: "application/vnd.google-apps.document",
-    modifiedTime: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    webViewLink: "https://drive.google.com/",
-  },
-  {
-    id: "3",
-    name: "Design Mockups.fig",
-    mimeType: "application/octet-stream",
-    modifiedTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    webViewLink: "https://drive.google.com/",
-  },
-  {
-    id: "4",
-    name: "Sprint Planning Sheet",
-    mimeType: "application/vnd.google-apps.spreadsheet",
-    modifiedTime: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-    webViewLink: "https://drive.google.com/",
-  },
-];
+// 📁 Estes são arquivos de exemplo apenas para demonstração da UI
+// Para mostrar seus arquivos reais, você precisará:
+// 1. Habilitar a Google Drive API no Firebase Console
+// 2. Adicionar o scope do Drive na configuração OAuth
+// 3. Implementar um endpoint no backend para buscar os arquivos
+const mockDriveFiles: DriveFile[] = [];
 
 function getFileIcon(mimeType: string) {
   if (mimeType.includes("document") || mimeType.includes("pdf")) {
@@ -100,40 +76,49 @@ export function DriveFilesList() {
       </div>
 
       <div className="space-y-0">
-        {mockDriveFiles.map((file, index) => {
-          const Icon = getFileIcon(file.mimeType);
-          const isLast = index === mockDriveFiles.length - 1;
+        {mockDriveFiles.length === 0 ? (
+          <div className="text-center py-8">
+            <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-sm text-muted-foreground mb-1">
+              Nenhum arquivo carregado
+            </p>
+            <p className="text-xs text-muted-foreground/70">
+              Conecte a API do Google Drive para ver seus arquivos
+            </p>
+          </div>
+        ) : (
+          mockDriveFiles.map((file, index) => {
+            const Icon = getFileIcon(file.mimeType);
+            const isLast = index === mockDriveFiles.length - 1;
 
-          return (
-            <a
-              key={file.id}
-              href={file.webViewLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex items-center gap-3 py-3 hover-elevate active-elevate-2 transition-all duration-200 rounded-md px-2 -mx-2 ${
-                !isLast ? "border-b border-border" : ""
-              }`}
-              data-testid={`link-drive-file-${file.id}`}
-            >
-              <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-normal truncate" data-testid={`text-filename-${file.id}`}>
-                  {file.name}
-                </p>
-                <p className="text-xs text-muted-foreground" data-testid={`text-modified-${file.id}`}>
-                  {formatTimeAgo(file.modifiedTime)}
-                </p>
-              </div>
-              <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            </a>
-          );
-        })}
+            return (
+              <a
+                key={file.id}
+                href={file.webViewLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-3 py-3 hover-elevate active-elevate-2 transition-all duration-200 rounded-md px-2 -mx-2 ${
+                  !isLast ? "border-b border-border" : ""
+                }`}
+                data-testid={`link-drive-file-${file.id}`}
+              >
+                <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-normal truncate" data-testid={`text-filename-${file.id}`}>
+                    {file.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground" data-testid={`text-modified-${file.id}`}>
+                    {formatTimeAgo(file.modifiedTime)}
+                  </p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              </a>
+            );
+          })
+        )}
       </div>
 
       <div className="mt-4 pt-4 border-t border-border">
-        <p className="text-xs text-muted-foreground mb-3">
-          Note: Connect Google Drive API to see your actual files
-        </p>
         <Button
           variant="outline"
           className="w-full gap-2"
