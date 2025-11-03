@@ -28,16 +28,26 @@ function Router() {
         }
       })
       .catch((error) => {
-        console.error("❌ Redirect error:");
+        console.group("❌ ERRO COMPLETO NO REDIRECT");
         console.error("Error code:", error.code);
         console.error("Error message:", error.message);
-        console.error("Full error:", error);
+        console.error("Error name:", error.name);
+        console.error("Error stack:", error.stack);
+        console.error("Full error object:", JSON.stringify(error, null, 2));
         console.error("Current domain:", window.location.hostname);
+        console.error("Current URL:", window.location.href);
         console.error("Auth domain configured:", auth.config.authDomain);
+        console.error("Firebase config:", {
+          apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? "Present" : "Missing",
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+          appId: import.meta.env.VITE_FIREBASE_APP_ID ? "Present" : "Missing"
+        });
+        console.groupEnd();
         
         // Show user-friendly error based on code
         let errorMsg = `Erro no login do Google!\n\n`;
-        errorMsg += `Código: ${error.code}\n`;
+        errorMsg += `Código: ${error.code || 'UNKNOWN'}\n`;
+        errorMsg += `Mensagem: ${error.message}\n`;
         errorMsg += `Domínio atual: ${window.location.hostname}\n\n`;
         
         if (error.code === "auth/unauthorized-domain") {
@@ -52,8 +62,12 @@ function Router() {
           errorMsg += `1. Vá em Firebase Console\n`;
           errorMsg += `2. Authentication → Sign-in method\n`;
           errorMsg += `3. Ative o provedor Google`;
-        } else {
-          errorMsg += `Erro: ${error.message}`;
+        } else if (error.code === "auth/invalid-api-key") {
+          errorMsg += `❌ API Key inválida!\n\n`;
+          errorMsg += `Verifique os Secrets do Replit.`;
+        } else if (!error.code) {
+          errorMsg += `⚠️ Erro sem código específico.\n`;
+          errorMsg += `Verifique o console do navegador para mais detalhes.`;
         }
         
         alert(errorMsg);
