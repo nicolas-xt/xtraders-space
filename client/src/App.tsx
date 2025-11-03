@@ -32,13 +32,31 @@ function Router() {
         console.error("Error code:", error.code);
         console.error("Error message:", error.message);
         console.error("Full error:", error);
+        console.error("Current domain:", window.location.hostname);
+        console.error("Auth domain configured:", auth.config.authDomain);
         
         // Show user-friendly error based on code
+        let errorMsg = `Erro no login do Google!\n\n`;
+        errorMsg += `Código: ${error.code}\n`;
+        errorMsg += `Domínio atual: ${window.location.hostname}\n\n`;
+        
         if (error.code === "auth/unauthorized-domain") {
-          alert(`Domínio não autorizado!\n\nAdicione '${window.location.hostname}' aos domínios autorizados no Firebase Console:\n\n1. Vá em Authentication → Settings\n2. Adicione o domínio na lista de 'Authorized domains'`);
+          errorMsg += `❌ Este domínio NÃO está autorizado!\n\n`;
+          errorMsg += `Solução:\n`;
+          errorMsg += `1. Vá em Firebase Console\n`;
+          errorMsg += `2. Authentication → Settings → Authorized domains\n`;
+          errorMsg += `3. Adicione: ${window.location.hostname}`;
         } else if (error.code === "auth/operation-not-allowed") {
-          alert("Provedor Google não está habilitado!\n\nHabilite no Firebase Console:\n\n1. Vá em Authentication → Sign-in method\n2. Ative o provedor Google");
+          errorMsg += `❌ Provedor Google não habilitado!\n\n`;
+          errorMsg += `Solução:\n`;
+          errorMsg += `1. Vá em Firebase Console\n`;
+          errorMsg += `2. Authentication → Sign-in method\n`;
+          errorMsg += `3. Ative o provedor Google`;
+        } else {
+          errorMsg += `Erro: ${error.message}`;
         }
+        
+        alert(errorMsg);
       });
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
