@@ -90,9 +90,9 @@ export default function Dashboard() {
   const handleJoinMeet = async () => {
     if (!currentUser) return;
     
+    setIsJoiningMeet(true);
+    
     try {
-      setIsJoiningMeet(true);
-      
       // Abrir o Google Meet primeiro
       const meetWindow = window.open(MEET_ROOM_URL, "_blank");
       
@@ -102,6 +102,7 @@ export default function Dashboard() {
           description: "Por favor, permita popups para este site.",
           variant: "destructive",
         });
+        setIsJoiningMeet(false);
         return;
       }
       
@@ -119,11 +120,12 @@ export default function Dashboard() {
         description: "Por favor, tente novamente.",
         variant: "destructive",
       });
-    } finally {
-      setTimeout(() => {
-        setIsJoiningMeet(false);
-      }, 1000);
     }
+    
+    // Resetar o estado após 1 segundo
+    setTimeout(() => {
+      setIsJoiningMeet(false);
+    }, 1000);
   };
 
   const handleSaveStatus = async (status: string) => {

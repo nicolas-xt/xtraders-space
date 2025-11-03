@@ -16,6 +16,23 @@ export default function Login() {
       setIsLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
 
+      // 🔒 Validar se o email pertence ao domínio permitido
+      const userEmail = result.user.email || "";
+      const allowedDomain = "xt-xtraders.com.br";
+      
+      if (!userEmail.endsWith(`@${allowedDomain}`)) {
+        // Email não autorizado - fazer logout
+        await signOut(auth);
+        setIsLoading(false);
+        
+        toast({
+          title: "Acesso negado",
+          description: `Apenas emails @${allowedDomain} podem acessar este Work Hub.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Extrair o Google Access Token do credential
       const credential = GoogleAuthProvider.credentialFromResult(result);
       if (credential?.accessToken) {

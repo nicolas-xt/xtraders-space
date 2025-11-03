@@ -109,14 +109,9 @@ export function usePresence() {
         } else {
           await updateStatus("Online");
         }
-      } else {
-        if (statusUpdateTimeoutRef.current) {
-          clearTimeout(statusUpdateTimeoutRef.current);
-        }
-        statusUpdateTimeoutRef.current = setTimeout(async () => {
-          await updateStatus("Offline");
-        }, 30000);
       }
+      // Não marcar como offline apenas por tab inativa
+      // Apenas beforeunload deve marcar como offline
     };
 
     const handleFocus = async () => {
