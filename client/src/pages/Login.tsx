@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { signInWithRedirect } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
 import { Users } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
@@ -19,14 +19,14 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      console.log("🚀 Starting Google sign-in...");
+      console.log("🚀 Starting Google sign-in with popup...");
       console.log("Current URL:", window.location.href);
       console.log("Auth Domain:", auth.config.authDomain);
-      console.log("Auth instance:", auth);
-      console.log("Google Provider:", googleProvider);
       
-      await signInWithRedirect(auth, googleProvider);
-      console.log("✅ Redirect initiated successfully - you should be redirected to Google now");
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log("✅ Sign-in successful!");
+      console.log("User:", result.user.displayName);
+      console.log("Email:", result.user.email);
     } catch (error: any) {
       console.error("❌ Error signing in:");
       console.error("Error code:", error.code);
