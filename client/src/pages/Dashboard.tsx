@@ -6,7 +6,7 @@ import { type TeamMember, type UserStatus } from "@shared/schema";
 import { usePresence } from "@/hooks/usePresence";
 import { TeamMemberCard } from "@/components/TeamMemberCard";
 import { TeamMemberSkeleton } from "@/components/TeamMemberSkeleton";
-import { DriveFilesList } from "@/components/DriveFilesList";
+import { TeamChat } from "@/components/TeamChat";
 import { StatusMessageDialog } from "@/components/StatusMessageDialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Video, ExternalLink, LogOut, Users, FolderOpen, MessageSquare } from "lucide-react";
+import { Video, ExternalLink, LogOut, Users, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 // 🔗 Link fixo do Google Meet da equipe
@@ -232,28 +232,28 @@ export default function Dashboard() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">Team Presence</h3>
+                <h3 className="text-lg font-medium">Team Members</h3>
                 <p className="text-sm text-muted-foreground" data-testid="text-team-count">
                   {teamMembers.length} member{teamMembers.length !== 1 ? "s" : ""}
                 </p>
               </div>
 
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[...Array(4)].map((_, i) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {[...Array(6)].map((_, i) => (
                     <TeamMemberSkeleton key={i} />
                   ))}
                 </div>
               ) : teamMembers.length === 0 ? (
                 <div className="text-center py-12">
-                  <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
                   <p className="text-muted-foreground">No team members yet</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {teamMembers
                     .sort((a, b) => {
                       if (a.uid === currentUser.uid) return -1;
@@ -272,8 +272,8 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div className="lg:col-span-1">
-              <DriveFilesList />
+            <div className="lg:col-span-2">
+              <TeamChat />
             </div>
           </div>
         </div>
