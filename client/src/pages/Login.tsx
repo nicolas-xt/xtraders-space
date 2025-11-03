@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth, provider } from "@/lib/firebase";
+import { auth, googleProvider } from "@/lib/firebase";
 import { Users } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useState } from "react";
@@ -14,7 +14,7 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, googleProvider);
 
       // Extrair o Google Access Token do credential
       const credential = GoogleAuthProvider.credentialFromResult(result);
