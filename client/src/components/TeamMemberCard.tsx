@@ -2,7 +2,7 @@ import { type TeamMember } from "@shared/schema";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { StatusBadge } from "./StatusBadge";
-import { Mail, Sparkles } from "lucide-react";
+import { Mail, Sparkles, PhoneCall } from "lucide-react";
 
 interface TeamMemberCardProps {
   member: TeamMember;
@@ -53,6 +53,13 @@ export function TeamMemberCard({ member, isCurrentUser = false }: TeamMemberCard
 
             {/* Status indicator */}
             <div className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-card ${statusConfig.color}`} />
+
+            {/* In-call icon overlay */}
+            {member.status === "In Call" && (
+              <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center border border-card shadow-sm">
+                <PhoneCall className="w-3 h-3" />
+              </div>
+            )}
           </div>
 
           {/* Info */}
