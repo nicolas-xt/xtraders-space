@@ -1,35 +1,100 @@
-name: Deploy to GitHub Pages
+name: Build and Deployname: Deploy to GitHub Pages
 
-on:
-  push:
-    branches:
-      - main # ou a branch que você usa como principal
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
 
-    steps:
+on:on:
+
+  push:  push:
+
+    branches: ["main"]    branches:
+
+  workflow_dispatch:      - main # ou a branch que você usa como principal
+
+
+
+# Dar permissão para deploy no GitHub Pagesjobs:
+
+permissions:  build-and-deploy:
+
+  contents: write    runs-on: ubuntu-latest
+
+  pages: write
+
+  id-token: write    steps:
+
       - name: Checkout
-        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20' # Use a versão do Node.js que seu projeto requer
+jobs:        uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: npm install
+  build-and-deploy:
 
-      - name: Build
+    name: Build e Deploy      - name: Set up Node.js
+
+    runs-on: ubuntu-latest        uses: actions/setup-node@v3
+
+    environment:        with:
+
+      name: github-pages          node-version: '20' # Use a versão do Node.js que seu projeto requer
+
+      url: ${{ steps.deployment.outputs.page_url }}
+
+            - name: Install dependencies
+
+    steps:        run: npm install
+
+      - name: Checkout
+
+        uses: actions/checkout@v4      - name: Build
+
         run: npm run build
+
+      - name: Setup Node.js        env:
+
+        uses: actions/setup-node@v4          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+
+        with:          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+
+          node-version: '20'          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+
+          cache: 'npm'
+
+      - name: Deploy
+
+      - name: Install Dependencies        uses: peaceiris/actions-gh-pages@v3
+
+        run: npm ci        with:
+
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build          publish_dir: ./dist/public
+
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+        run: |
+          # Garantir que o dist está limpo
+          rm -rf dist
+          
+          # Build da aplicação React
+          npm run build
+          
+          # Preparar diretório docs para GitHub Pages
+          rm -rf docs
+          cp -r dist/public docs
+          
+          # Debug: Listar arquivos
+          echo "Conteúdo do diretório docs:"
+          ls -la docs/
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Build Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist/public
+          path: 'docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
