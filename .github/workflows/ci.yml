@@ -30,6 +30,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check VITE env presence
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+        run: |
+          echo "VITE_FIREBASE_API_KEY set: ${VITE_FIREBASE_API_KEY:+yes}"
+          echo "VITE_FIREBASE_PROJECT_ID set: ${VITE_FIREBASE_PROJECT_ID:+yes}"
+          echo "VITE_FIREBASE_APP_ID set: ${VITE_FIREBASE_APP_ID:+yes}"
+
       - name: Build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
