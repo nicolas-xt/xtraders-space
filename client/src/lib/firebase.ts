@@ -40,8 +40,16 @@ googleProvider.addScope('https://www.googleapis.com/auth/drive.metadata.readonly
 try {
   // Type assertion porque `settings` não está tipado fortemente em algumas versões
   // do SDK modular. Se não for suportado, isso não quebra a inicialização.
-  (db as any).settings?.({ experimentalForceLongPolling: true });
-  console.info("Firestore: experimentalForceLongPolling enabled to improve transport stability.");
+  const forceLongPollingEnv = import.meta.env.VITE_FIRESTORE_FORCE_LONG_POLLING;
+  const enableLongPolling =
+    forceLongPollingEnv === undefined ? true : String(forceLongPollingEnv).toLowerCase() === "true";
+
+  if (enableLongPolling) {
+    (db as any).settings?.({ experimentalForceLongPolling: true });
+    console.info("Firestore: experimentalForceLongPolling enabled to improve transport stability.");
+  } else {
+    console.info("Firestore: experimentalForceLongPolling disabled via VITE_FIRESTORE_FORCE_LONG_POLLING=false");
+  }
 } catch (err) {
   console.warn("Firestore: could not enable experimentalForceLongPolling", err);
 }

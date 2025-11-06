@@ -56,7 +56,13 @@ export function TeamMemberCard({ member, isCurrentUser = false }: TeamMemberCard
 
             {/* In-call icon overlay */}
             {member.status === "In Call" && (
-              <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center border border-card shadow-sm">
+              <div
+                className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center border border-card shadow-sm animate-pulse"
+                title="Em chamada"
+                role="img"
+                aria-label="Usuário em chamada"
+                data-testid={`in-call-badge-${member.uid}`}
+              >
                 <PhoneCall className="w-3 h-3" />
               </div>
             )}
