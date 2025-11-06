@@ -80,55 +80,83 @@ export function usePresence() {
   };
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (!user) return;
+    // Listen for auth state changes so we can initialize presence when the user signs in
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      // If no user, nothing to do here (sign-out flow handled elsewhere)
+      if (!user) return;
 
-    initializeUserPresence();
+      // Initialize presence doc for this user
+      initializeUserPresence();
 
-    const handleBeforeUnload = async () => {
-      const userRef = doc(db, "users", user.uid);
-      try {
-        await setDoc(
-          userRef,
-          {
-            status: "Offline" as UserStatus,
-            lastSeen: Date.now(),
-          },
-          { merge: true }
-        );
-      } catch (error) {
-        console.error("Error updating status on unload:", error);
-      }
-    };
+      // Handlers bound to the current user
+      const handleBeforeUnload = async () => {
+        const userRef = doc(db, "users", user.uid);
+        try {
+          await setDoc(
+            userRef,
+            {
+              status: "Offline" as UserStatus,
+              lastSeen: Date.now(),
+            },
+            { merge: true }
+          );
+        } catch (error) {
+          console.error("Error updating status on unload:", error);
+        }
+      };
 
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === "visible") {
+      const handleVisibilityChange = async () => {
+        if (document.visibilityState === "visible") {
+          if (wasInCallRef.current) {
+            await updateStatus("Online");
+            wasInCallRef.current = false;
+          } else {
+            await updateStatus("Online");
+          }
+        }
+        // Não marcar como offline apenas por tab inativa
+        // Apenas beforeunload deve marcar como offline
+      };
+
+      const handleFocus = async () => {
         if (wasInCallRef.current) {
           await updateStatus("Online");
           wasInCallRef.current = false;
-        } else {
-          await updateStatus("Online");
         }
-      }
-      // Não marcar como offline apenas por tab inativa
-      // Apenas beforeunload deve marcar como offline
-    };
+      };
 
-    const handleFocus = async () => {
-      if (wasInCallRef.current) {
-        await updateStatus("Online");
-        wasInCallRef.current = false;
-      }
-    };
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      window.addEventListener("focus", handleFocus);
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
+      // Cleanup for this user's handlers when auth state changes again
+      const cleanup = () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        window.removeEventListener("focus", handleFocus);
+      };
+
+      // When the user signs out, make sure we mark them offline and cleanup listeners
+      const unsubscribeSignOut = onAuthStateChanged(auth, async (u) => {
+        if (!u) {
+          try {
+            await setDoc(
+              doc(db, "users", user.uid),
+              { status: "Offline" as UserStatus, lastSeen: Date.now() },
+              { merge: true }
+            );
+          } catch (err) {
+            console.error("Error marking user offline on sign-out:", err);
+          }
+          cleanup();
+          // stop this inner listener
+          unsubscribeSignOut();
+        }
+      });
+    });
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
+      unsubscribeAuth();
       if (statusUpdateTimeoutRef.current) {
         clearTimeout(statusUpdateTimeoutRef.current);
       }
