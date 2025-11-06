@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -43,11 +45,27 @@ jobs:
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
         run: npm run build
 
-      - name: Deploy to gh-pages (via actions-gh-pages)
-        uses: actions/deploy-pages@v1
-        with:
-          ref: main
-          persist-credentials: true
-          publish_dir: ./dist/public
-          publish_branch: main:/docs
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commit built site to docs/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # configure git author so the commit is attributed to the actions bot
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # prepare docs/ with the built site
+          rm -rf docs
+          mkdir -p docs
+          # copy built files (Vite output)
+          cp -r dist/public/* docs/
+
+          # commit only if something changed
+          git add docs
+          if git diff --cached --quiet; then
+            echo "No changes to docs/ — nothing to commit"
+          else
+            git commit -m "chore: deploy site to docs [skip ci]"
+            # push using the token provided by the Actions runner (persist-credentials should allow this)
+            git push origin HEAD:main
+          fi
