@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Log configuration for debugging
@@ -25,7 +25,34 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.appId
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Prefer initializing Firestore with experimentalForceLongPolling when available
+let _db: any;
+try {
+  const forceLongPollingEnv = import.meta.env.VITE_FIRESTORE_FORCE_LONG_POLLING;
+  const enableLongPolling =
+    forceLongPollingEnv === undefined ? true : String(forceLongPollingEnv).toLowerCase() === "true";
+
+  if (enableLongPolling && typeof initializeFirestore === "function") {
+    // initializeFirestore accepts settings; use it to enable long polling when possible
+    _db = initializeFirestore(app, { experimentalForceLongPolling: true });
+    console.info("Firestore: initialized with experimentalForceLongPolling via initializeFirestore()");
+  } else {
+    _db = getFirestore(app);
+  }
+} catch (err) {
+  // Fallback to getFirestore and try to set settings on the instance
+  console.warn("Firestore: could not initialize with long polling, falling back to getFirestore", err);
+  _db = getFirestore(app);
+  try {
+    // attempt to set settings on the instance (some SDK versions expose settings())
+    ( _db as any ).settings?.({ experimentalForceLongPolling: true });
+    console.info("Firestore: experimentalForceLongPolling enabled via settings() fallback");
+  } catch (e) {
+    console.warn("Firestore: unable to enable experimentalForceLongPolling on fallback", e);
+  }
+}
+
+export const db = _db;
 export const googleProvider = new GoogleAuthProvider();
 export const storage = getStorage(app);
 
