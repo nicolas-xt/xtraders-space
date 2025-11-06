@@ -44,9 +44,10 @@ jobs:
         run: npm run build
 
       - name: Deploy to gh-pages (via actions-gh-pages)
-        uses: peaceiris/actions-gh-pages@v4
+        uses: actions/deploy-pages@v1
         with:
-          # Prefer a personal access token stored as GH_PAGES_TOKEN (needed if branch protection blocks github-actions bot)
-          github_token: ${{ secrets.GH_PAGES_TOKEN || github.token }}
+          ref: main
+          persist-credentials: true
           publish_dir: ./dist/public
-          publish_branch: gh-pages
+          publish_branch: main:/docs
+          github_token: ${{ secrets.GITHUB_TOKEN }}
