@@ -19,6 +19,7 @@ export default function Login() {
       const userEmail = result.user.email || "";
       const allowedEmails = [
         "nicolas@xt-xtraders.com.br",
+        "nathalie@xt-xtraders.com.br",
         "willian@xt-xtraders.com.br",
         "suporte@xt-xtraders.com.br",
         "felipewcolognesi@gmail.com",
